@@ -307,7 +307,7 @@ class Program
         Console.WriteLine(txId != null ? "Transfer completed." : "Transfer failed when creating transaction record.");
     }
 
-    // Company manager loop (extended)
+    // Company manager manu and handlers
     static async Task CompanyManagerMenuLoop(IProductRepository productRepo, ICategoryRepository categoryRepo, IStoreRepository storeRepo, ICompanyAccountRepository companyAccountRepo, IOrderRepository orderRepo, IOrderItemRepository orderItemRepo)
     {
         var ct = CancellationToken.None;
@@ -547,6 +547,7 @@ class Program
         }
     }
 
+    // Store manager menu and handlers
     static async Task StoreManagerMenuLoop(Store store, IProductRepository productRepo, IOrderRepository orderRepo, IOrderItemRepository orderItemRepo, IStoreAccountRepository storeAccountRepo, ICompanyAccountRepository companyAccountRepo, ITransactionRepository transactionRepo)
     {
         var ct = CancellationToken.None;
