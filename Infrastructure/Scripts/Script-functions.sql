@@ -262,6 +262,51 @@ select * from transfer_store_to_company(
 	0.5
 );
 
+-- Перевод денег со счёта компании на счёт магазина
+CREATE OR REPLACE FUNCTION transfer_company_to_store(
+    p_company_account_id UUID,
+    p_store_account_id UUID,
+    p_amount DECIMAL(12, 2)
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_company_balance DECIMAL(12, 2);
+BEGIN
+    IF p_amount <= 0 THEN
+        RAISE EXCEPTION 'Сумма должна быть положительной';
+    END IF;
+
+    SELECT balance INTO v_company_balance
+    FROM company_accounts
+    WHERE id = p_company_account_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Счёт компании не найден';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM store_accounts WHERE id = p_store_account_id) THEN
+        RAISE EXCEPTION 'Счёт магазина не найден';
+    END IF;
+
+    IF v_company_balance < p_amount THEN
+        RAISE EXCEPTION 'Недостаточно средств. Доступно: %, требуется: %', v_company_balance, p_amount;
+    END IF;
+
+    UPDATE company_accounts
+    SET balance = balance - p_amount
+    WHERE id = p_company_account_id;
+
+    UPDATE store_accounts
+    SET balance = balance + p_amount
+    WHERE id = p_store_account_id;
+
+    INSERT INTO transactions (amount, store_account_id, company_account_id)
+    VALUES (p_amount, p_store_account_id, p_company_account_id);
+
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql;
+
 
 
 

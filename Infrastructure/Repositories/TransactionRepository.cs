@@ -113,4 +113,35 @@ public class TransactionRepository : ITransactionRepository
         }
         return list;
     }
+
+    
+    public async Task<Guid?> TransferStoreToCompany(Guid compAccId, Guid storeAccId, decimal amount, CancellationToken cancellationToken)
+    {
+        const string sql = @"select * from transfer_store_to_company(@storeAccId, @compAccId, @amount);";
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(cancellationToken);
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("storeAccId", storeAccId);
+        cmd.Parameters.AddWithValue("compAccId", compAccId);
+        cmd.Parameters.AddWithValue("amount", amount);
+
+        var affected = await cmd.ExecuteNonQueryAsync(cancellationToken);
+        return affected > 0 ? new Guid() : null;
+    }
+
+    public async Task<Guid?> TransferCompanyToStore(Guid companyAccountId, Guid storeAccountId, decimal amount, CancellationToken cancellationToken)
+    {
+        const string sql = @"select * from transfer_company_to_store(@companyAccId, @storeAccId, @amount);";
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(cancellationToken);
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("companyAccId", companyAccountId);
+        cmd.Parameters.AddWithValue("storeAccId", storeAccountId);
+        cmd.Parameters.AddWithValue("amount", amount);
+
+        var affected = await cmd.ExecuteNonQueryAsync(cancellationToken);
+        return affected > 0 ? new Guid() : null;
+    }
 }
